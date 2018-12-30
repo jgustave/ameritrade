@@ -6,22 +6,45 @@ import okio.ByteString;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.Properties;
 
 /**
  *
  */
 public class AmerTest {
-    private static final String BT = "PUT YOUR AUTH TOKEN HERE";
+
     public static void main(String[] args) {
 
-        JSONObject jobj = getUserPrincipals(BT);
+        //Get Refresh token (expires after 90 days)
+        Properties props = getProps();
+
+        //Get an Auth Token (Expires after 30 minutes)
+        String authToken = getRefreshToken(props.getProperty("refresh_token"),props.getProperty("client_id"));
+
+        //Get Ameritrade user config.
+        JSONObject jobj = getUserPrincipals(authToken);
+
+        //start websocket data.
         loginStream(jobj);
 
     }
 
-    public static JSONObject getUserPrincipals (String bt) {
+    public static Properties getProps() {
+        Properties props = new Properties();
+        try {
+            props.load(new FileInputStream(".props/props.txt"));
+            return( props );
+        }
+        catch (IOException e) {
+            throw new RuntimeException("",e);
+        }
+    }
+
+
+    public static JSONObject getUserPrincipals (String authToken) {
         OkHttpClient client = new OkHttpClient();
 
         HttpUrl.Builder urlBuilder = HttpUrl.parse("https://api.tdameritrade.com/v1/userprincipals").newBuilder();
@@ -29,7 +52,7 @@ public class AmerTest {
         String url = urlBuilder.build().toString();
 
         Request request = new Request.Builder()
-                            .header("Authorization", "Bearer "+bt)
+                            .header("Authorization", "Bearer "+authToken)
                              .url(url)
                              .build();
 
@@ -44,6 +67,49 @@ public class AmerTest {
             throw new RuntimeException(e);
         }
     }
+
+    /**
+     * Instructions on how to create an auth token.
+     * https://www.reddit.com/r/algotrading/comments/914q22/successful_access_to_td_ameritrade_api/
+     * https://developer.tdameritrade.com/content/simple-auth-local-apps
+     * https://developer.tdameritrade.com/authentication/apis/post/token-0
+     * @param refreshToken
+     * @param clientId
+     * @return
+     */
+    public static String getRefreshToken(String refreshToken, String clientId) {
+        OkHttpClient client = new OkHttpClient();
+
+        RequestBody requestBody = new FormBody.Builder()
+                .add("grant_type", "refresh_token")
+                .add("access_type", "offline")
+                .add("client_id", clientId)
+                .add("refresh_token", refreshToken)
+                .build();
+
+
+
+        Request request = new Request.Builder()
+                .addHeader("Content-Type", "application/x-www-form-urlencoded")
+                .url("https://api.tdameritrade.com/v1/oauth2/token")
+                .post(requestBody)
+                .build();
+
+        try {
+            Response   response = client.newCall(request).execute();
+            if( response.code() != 200 ) {
+                throw new RuntimeException("Failed:" + response);
+            }
+            String     jsonData = response.body().string();
+            JSONObject jobj  = new JSONObject(jsonData);
+            return( jobj.getString("access_token") );
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
 
     public static void loginStream (JSONObject userPrincipals ) {
         String strmUrl = userPrincipals.getJSONObject("streamerInfo").getString("streamerSocketUrl");
@@ -159,7 +225,13 @@ public class AmerTest {
         System.out.println("CCC");
 
     }
-    public static JSONObject wrap(JSONObject obj) {
+
+    /**
+     * Small helper to wrap a request
+     * @param obj
+     * @return
+     */
+    private static JSONObject wrap(JSONObject obj) {
         JSONObject req = new JSONObject();
         JSONArray lreqArray = new JSONArray();
         req.put("requests",lreqArray);

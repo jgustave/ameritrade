@@ -45,12 +45,6 @@ public class StrmCredentials {
 
     }
 
-//    public String toQp () {
-//
-//        return "userid="+URLEncoder.encode(userid)+"&token="+URLEncoder.encode(token)+"&company="+URLEncoder.encode(company)+
-//               "&segment="+URLEncoder.encode(segment)+"&cddomain="+URLEncoder.encode(cddomain)+"&usergroup="+URLEncoder.encode(usergroup)+
-//               "&accesslevel="+URLEncoder.encode(accesslevel)+"&authorized="+URLEncoder.encode(authorized);
-//    }
     public String toQpb () {
 
         return "userid="+userid+"&token="+token+"&company="+company+
