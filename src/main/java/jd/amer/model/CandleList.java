@@ -9,7 +9,7 @@ import java.util.List;
 public class CandleList {
     private boolean empty;
     private String symbol;
-    private List<Candles> candles = new ArrayList<>();
+    private List<Candle> candles = new ArrayList<>();
 
     public boolean isEmpty () {
         return empty;
@@ -19,7 +19,7 @@ public class CandleList {
         return symbol;
     }
 
-    public List<Candles> getCandles () {
+    public List<Candle> getCandles () {
         return candles;
     }
 }

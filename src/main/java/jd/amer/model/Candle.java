@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 /**
  *
  */
-public class Candles {
+public class Candle {
     private BigDecimal volume = null;
     private BigDecimal open = null;
     private BigDecimal high = null;
@@ -51,24 +51,24 @@ public class Candles {
             return false;
         }
 
-        Candles candles = (Candles) o;
+        Candle candle = (Candle) o;
 
-        if (datetime != candles.datetime) {
+        if (datetime != candle.datetime) {
             return false;
         }
-        if (!volume.equals(candles.volume)) {
+        if (!volume.equals(candle.volume)) {
             return false;
         }
-        if (!open.equals(candles.open)) {
+        if (!open.equals(candle.open)) {
             return false;
         }
-        if (!high.equals(candles.high)) {
+        if (!high.equals(candle.high)) {
             return false;
         }
-        if (!low.equals(candles.low)) {
+        if (!low.equals(candle.low)) {
             return false;
         }
-        return close.equals(candles.close);
+        return close.equals(candle.close);
 
     }
 
