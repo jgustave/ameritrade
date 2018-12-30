@@ -1,5 +1,8 @@
 package jd.amer;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import jd.amer.model.CandleList;
 import jd.amer.model.StrmCredentials;
 import okhttp3.*;
 import okio.ByteString;
@@ -13,7 +16,7 @@ import java.net.URLEncoder;
 import java.util.Properties;
 
 /**
- *
+ * Janky Hello World to use the AMeritrade API.
  */
 public class AmerTest {
 
@@ -32,10 +35,16 @@ public class AmerTest {
         props.setProperty("refresh_token",refreshToken);
         setProps(props);
 
+        // Get 1 minute bars
+        CandleList candleList = getPriceHistory(authToken, "AAPL");
+
+        //Get current quote and various info
+        JSONObject qobj = getQuote(authToken, "AAPL");
+
         //Get Ameritrade user config.
         JSONObject jobj = getUserPrincipals(authToken);
 
-        //start websocket data.
+        //start websocket data try to get real time chart info.
         loginStream(jobj);
 
     }
@@ -73,6 +82,80 @@ public class AmerTest {
 
         try {
             Response   response = client.newCall(request).execute();
+            if( response.code() != 200 ) {
+                throw new RuntimeException("Failed:" + response);
+            }
+
+            String     jsonData = response.body().string();
+            JSONObject jobj  = new JSONObject(jsonData);
+            return( jobj );
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     *
+     * @param authToken
+     * @return
+     */
+    public static CandleList getPriceHistory (String authToken, String symbol) {
+        OkHttpClient client = new OkHttpClient();
+
+        //https://api.tdameritrade.com/v1/marketdata/AAPL/pricehistory
+        HttpUrl.Builder urlBuilder = HttpUrl.parse("https://api.tdameritrade.com/v1/marketdata/"+symbol+"/pricehistory").newBuilder();
+        urlBuilder.addQueryParameter("periodType", "day");
+        urlBuilder.addQueryParameter("period", "2");
+        urlBuilder.addQueryParameter("frequencyType", "minute");
+        urlBuilder.addQueryParameter("frequency", "1");
+        urlBuilder.addQueryParameter("needExtendedHoursData", "false");
+        String url = urlBuilder.build().toString();
+
+        Request request = new Request.Builder()
+                            .header("Authorization", "Bearer "+authToken)
+                             .url(url)
+                             .build();
+
+        try {
+            Response   response = client.newCall(request).execute();
+            if( response.code() != 200 ) {
+                throw new RuntimeException("Failed:" + response);
+            }
+            Gson       gson     = new GsonBuilder().create();
+            CandleList list = gson.fromJson(response.body().charStream(),CandleList.class);
+            return( list );
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     *
+     * @param authToken
+     * @return
+     */
+    public static JSONObject getQuote (String authToken, String symbol) {
+        OkHttpClient client = new OkHttpClient();
+
+        //https://api.tdameritrade.com/v1/marketdata/AAPL/pricehistory
+        HttpUrl.Builder urlBuilder = HttpUrl.parse("https://api.tdameritrade.com/v1/marketdata/"+symbol+"/quotes").newBuilder();
+        String url = urlBuilder.build().toString();
+
+        Request request = new Request.Builder()
+                            .header("Authorization", "Bearer "+authToken)
+                             .url(url)
+                             .build();
+
+        try {
+            Response   response = client.newCall(request).execute();
+            if( response.code() != 200 ) {
+                throw new RuntimeException("Failed:" + response);
+            }
+
             String     jsonData = response.body().string();
             JSONObject jobj  = new JSONObject(jsonData);
             return( jobj );
