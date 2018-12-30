@@ -16,10 +16,6 @@
 
 
     <repositories>
-        <!--mvn deploy:deploy-file -Durl=file:///Users/jerdavis/devhome/jerbot/repo -Dfile=/Users/jerdavis/devhome/simple-slack-api/sources/build/libs/simpleslackapi-1.0.0-SNAPSHOT.jar -DgroupId=ullink -DartifactId=simple-slack-api -Dpackaging=jar -Dversion=1.0.0-->
-
-
-        <!--mvn deploy:deploy-file -Durl=file:///Users/jerdavis/devhome/projects/gdaxlog/repo -Dfile=/Users/jerdavis/devhome/libs/binance/target/binance-api-client-1.0.0.jar -DgroupId=com.binance.api -DartifactId=binance-api-client -Dpackaging=jar -Dversion=1.0.0-->
 
         <repository>
            <id>project.local</id>
@@ -58,31 +54,10 @@
             <version>20180813</version>
         </dependency>
 
-        <!--<dependency>-->
-            <!--<groupId>commons-lang</groupId>-->
-            <!--<artifactId>commons-lang</artifactId>-->
-            <!--<version>2.4</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>com.fasterxml.jackson.core</groupId>-->
-            <!--<artifactId>jackson-databind</artifactId>-->
-            <!--<version>2.5.4</version>-->
-        <!--</dependency>-->
-
     </dependencies>
 
     <build>
         <plugins>
-            <!--<plugin>-->
-              <!--<groupId>org.apache.maven.plugins</groupId>-->
-              <!--<artifactId>3.5.1</artifactId>-->
-              <!--<version>(whatever version is current)</version>-->
-              <!--<configuration>-->
-                <!--&lt;!&ndash; or whatever version you use &ndash;&gt;-->
-                <!--<source>1.8</source>-->
-                <!--<target>1.8</target>-->
-              <!--</configuration>-->
-            <!--</plugin>-->
 
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -101,24 +76,6 @@
               </execution>
             </executions>
           </plugin>
-
-        <!--<plugin>-->
-            <!--<groupId>org.jsonschema2pojo</groupId>-->
-            <!--<artifactId>jsonschema2pojo-maven-plugin</artifactId>-->
-            <!--<version>1.0.0</version>-->
-            <!--<configuration>-->
-                <!--<sourceDirectory>${basedir}/src/main/resources/schema</sourceDirectory>-->
-                <!--<targetPackage>jd.amer.amerModel</targetPackage>-->
-            <!--</configuration>-->
-            <!--<executions>-->
-                <!--<execution>-->
-                    <!--<goals>-->
-                        <!--<goal>generate</goal>-->
-                    <!--</goals>-->
-                <!--</execution>-->
-            <!--</executions>-->
-        <!--</plugin>-->
-
 
         </plugins>
       </build>
