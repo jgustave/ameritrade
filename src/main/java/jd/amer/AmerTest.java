@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.Properties;
@@ -22,7 +23,14 @@ public class AmerTest {
         Properties props = getProps();
 
         //Get an Auth Token (Expires after 30 minutes)
-        String authToken = getRefreshToken(props.getProperty("refresh_token"),props.getProperty("client_id"));
+        JSONObject authResponse = getRefreshToken(props.getProperty("refresh_token"),props.getProperty("client_id"));
+
+        String authToken = authResponse.getString("access_token");
+        String refreshToken = authResponse.getString("refresh_token");
+
+        //Save the updated refresh token (it seems to expire before 90 days)
+        props.setProperty("refresh_token",refreshToken);
+        setProps(props);
 
         //Get Ameritrade user config.
         JSONObject jobj = getUserPrincipals(authToken);
@@ -42,7 +50,14 @@ public class AmerTest {
             throw new RuntimeException("",e);
         }
     }
-
+    public static void setProps(Properties props) {
+        try {
+            props.store( new FileOutputStream(".props/props.txt"),"");
+        }
+        catch (IOException e) {
+            throw new RuntimeException("",e);
+        }
+    }
 
     public static JSONObject getUserPrincipals (String authToken) {
         OkHttpClient client = new OkHttpClient();
@@ -77,7 +92,7 @@ public class AmerTest {
      * @param clientId
      * @return
      */
-    public static String getRefreshToken(String refreshToken, String clientId) {
+    public static JSONObject getRefreshToken(String refreshToken, String clientId) {
         OkHttpClient client = new OkHttpClient();
 
         RequestBody requestBody = new FormBody.Builder()
@@ -102,7 +117,7 @@ public class AmerTest {
             }
             String     jsonData = response.body().string();
             JSONObject jobj  = new JSONObject(jsonData);
-            return( jobj.getString("access_token") );
+            return( jobj );
         }
         catch (IOException e) {
             e.printStackTrace();
