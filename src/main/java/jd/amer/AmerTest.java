@@ -13,6 +13,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.Properties;
 
 /**
@@ -37,20 +40,25 @@ public class AmerTest {
         props.setProperty("refresh_token",refreshToken);
         setProps(props);
 
-        JSONArray accounts = getAccounts(authToken);
-        JSONObject account = getAccount(authToken,accountId);
-
-
-        System.out.println("isDayTrader:" + account.getJSONObject("securitiesAccount").getBoolean("isDayTrader"));
-        System.out.println("Cash:" + account.getJSONObject("securitiesAccount").getJSONObject("currentBalances").getBigDecimal("cashAvailableForTrading"));
+//        JSONArray accounts = getAccounts(authToken);
+//        JSONObject account = getAccount(authToken,accountId);
+//
+//
+//        System.out.println("isDayTrader:" + account.getJSONObject("securitiesAccount").getBoolean("isDayTrader"));
+//        System.out.println("Cash:" + account.getJSONObject("securitiesAccount").getJSONObject("currentBalances").getBigDecimal("cashAvailableForTrading"));
 
 
         // Get 1 minute bars
-        CandleList candleList = getPriceHistory(authToken, "AAPL");
+        //CandleList candleList = getPriceHistory(authToken, "AAPL");
 
-        //Get current quote and various info
-        JSONObject qobj = getQuote(authToken, "AAPL");
-
+        // Get 1 minute bars
+//        CandleList cl1 = getPriceHistoryByTime(authToken, "AAPL");
+//        System.out.println(new Date(cl1.getCandles().get(0).getDatetime()) + " to " + new Date(cl1.getCandles().get(cl1.getCandles().size() - 1).getDatetime()));
+//
+//
+//        //Get current quote and various info
+//        JSONObject qobj = getQuote(authToken, "AAPL");
+//
         //Get Ameritrade user config.
         JSONObject jobj = getUserPrincipals(authToken);
 
@@ -344,10 +352,6 @@ public class AmerTest {
         System.out.println(foo);
         webSocket.send(foo);
 
-
-
-        System.out.println("AAA");
-
         JSONObject jo1 = new JSONObject();
         jo1.put("keys","AAPL");
         jo1.put("fields","0,1,2,3,4,5,6,7");
@@ -357,7 +361,6 @@ public class AmerTest {
         jo.put("command","SUBS");
         jo.put("account",userPrincipals.getJSONArray("accounts").getJSONObject(0).getString("accountId"));
         jo.put("source",userPrincipals.getJSONObject("streamerInfo").getString("appId"));
-
         jo.put("parmeters",jo1);
 
         try
@@ -367,7 +370,6 @@ public class AmerTest {
         {}
         System.out.println(wrap(jo).toString());
         webSocket.send(wrap(jo).toString());
-        System.out.println("BBB");
 
 
         JSONObject job1 = new JSONObject();
@@ -388,10 +390,119 @@ public class AmerTest {
         {}
         System.out.println(wrap(job).toString());
         webSocket.send(wrap(job).toString());
-        System.out.println("CCC");
+
+
+        JSONObject params1 = new JSONObject();
+        params1.put("symbol","/ES");
+        params1.put("frequency","m1");
+        params1.put("period","d1");
+        JSONObject foo1 = new JSONObject();
+        foo1.put("service","CHART_HISTORY_FUTURES");
+        foo1.put("requestid","3");
+        foo1.put("command","GET");
+        foo1.put("account",userPrincipals.getJSONArray("accounts").getJSONObject(0).getString("accountId"));
+        foo1.put("source",userPrincipals.getJSONObject("streamerInfo").getString("appId"));
+        foo1.put("parmeters",params1);
+
+        try
+        {
+           Thread.sleep(3000);
+        }catch( Exception ignored )
+        {}
+        System.out.println(wrap(foo1).toString());
+        webSocket.send(wrap(foo1).toString());
+
+
+        JSONObject params2 = new JSONObject();
+        params2.put("keys","/ES");
+        params2.put("fields","0,1,2,3,4");
+        JSONObject foo2 = new JSONObject();
+        foo2.put("service","LEVELONE_FUTURES");
+        foo2.put("requestid","6");
+        foo2.put("command","SUBS");
+        foo2.put("account",userPrincipals.getJSONArray("accounts").getJSONObject(0).getString("accountId"));
+        foo2.put("source",userPrincipals.getJSONObject("streamerInfo").getString("appId"));
+        foo2.put("parmeters",params2);
+
+        try
+        {
+           Thread.sleep(3000);
+        }catch( Exception ignored )
+        {}
+        System.out.println(wrap(foo2).toString());
+        webSocket.send(wrap(foo2).toString());
+
+
+        JSONObject params3 = new JSONObject();
+        params3.put("keys","AAPL");
+        params3.put("fields","0,1,2,3,4");
+        JSONObject foo3 = new JSONObject();
+        foo3.put("service","TIMESALE_EQUITY");
+        foo3.put("requestid","7");
+        foo3.put("command","SUBS");
+        foo3.put("account",userPrincipals.getJSONArray("accounts").getJSONObject(0).getString("accountId"));
+        foo3.put("source",userPrincipals.getJSONObject("streamerInfo").getString("appId"));
+        foo3.put("parmeters",params3);
+
+        try
+        {
+           Thread.sleep(3000);
+        }catch( Exception ignored )
+        {}
+        System.out.println(wrap(foo3).toString());
+        webSocket.send(wrap(foo3).toString());
+
 
     }
+    /**
+     * Seems to somewhat ignore the startDate. StartDate within the same day
+     * seems to snap to the beginning of the day.
+     * End date it mostly uses as specified.
+     *
+     *
+     *
+     * @param authToken
+     * @return
+     */
+    public static CandleList getPriceHistoryByTime (String authToken, String symbol) {
 
+        //ZonedDateTime end = ZonedDateTime.of(2018, 12, 20, 12, 10, 0, 0, ZoneId.of("America/New_York"));
+        //ZonedDateTime end    = ZonedDateTime.of(2018, 12, 20, 14, 5, 0, 0, ZoneId.of("America/New_York"));
+        ZonedDateTime end    = ZonedDateTime.of(2019, 1, 1, 14, 5, 0, 0, ZoneId.of("America/New_York"));
+        long          ee     = end.toInstant().getEpochSecond()* 1000;
+        OkHttpClient  client = new OkHttpClient();
+
+        //https://api.tdameritrade.com/v1/marketdata/AAPL/pricehistory
+        HttpUrl.Builder urlBuilder = HttpUrl.parse("https://api.tdameritrade.com/v1/marketdata/"+symbol+"/pricehistory").newBuilder();
+//        urlBuilder.addQueryParameter("periodType", "day");
+//        urlBuilder.addQueryParameter("period", "2");
+        urlBuilder.addQueryParameter("frequencyType", "minute");
+        urlBuilder.addQueryParameter("frequency", "1");
+        urlBuilder.addQueryParameter("needExtendedHoursData", "false");
+        urlBuilder.addQueryParameter("startDate", String.valueOf(ee-(10*24*60*60*1000)));
+        //urlBuilder.addQueryParameter("startDate", String.valueOf(ee-(2*60*60*1000)));
+        urlBuilder.addQueryParameter("endDate", String.valueOf(ee));
+        String url = urlBuilder.build().toString();
+
+        Request request = new Request.Builder()
+                            .header("Authorization", "Bearer "+authToken)
+                             .url(url)
+                             .build();
+
+        try {
+            Response   response = client.newCall(request).execute();
+            if( response.code() != 200 ) {
+                throw new RuntimeException("Failed:" + response);
+            }
+            Gson       gson     = new GsonBuilder().create();
+            CandleList list = gson.fromJson(response.body().charStream(),CandleList.class);
+            return( list );
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
     /**
      * Small helper to wrap a request
      * @param obj
