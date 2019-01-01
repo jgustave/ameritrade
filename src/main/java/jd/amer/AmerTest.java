@@ -24,6 +24,7 @@ public class AmerTest {
 
         //Get Refresh token (expires after 90 days)
         Properties props = getProps();
+        String accountId = props.getProperty("account_id");
 
         //Get an Auth Token (Expires after 30 minutes)
         JSONObject authResponse = getRefreshToken(props.getProperty("refresh_token"),props.getProperty("client_id"));
@@ -31,9 +32,18 @@ public class AmerTest {
         String authToken = authResponse.getString("access_token");
         String refreshToken = authResponse.getString("refresh_token");
 
+
         //Save the updated refresh token (it seems to expire before 90 days)
         props.setProperty("refresh_token",refreshToken);
         setProps(props);
+
+        JSONArray accounts = getAccounts(authToken);
+        JSONObject account = getAccount(authToken,accountId);
+
+
+        System.out.println("isDayTrader:" + account.getJSONObject("securitiesAccount").getBoolean("isDayTrader"));
+        System.out.println("Cash:" + account.getJSONObject("securitiesAccount").getJSONObject("currentBalances").getBigDecimal("cashAvailableForTrading"));
+
 
         // Get 1 minute bars
         CandleList candleList = getPriceHistory(authToken, "AAPL");
@@ -95,6 +105,63 @@ public class AmerTest {
             throw new RuntimeException(e);
         }
     }
+
+    public static JSONArray getAccounts (String authToken) {
+        OkHttpClient client = new OkHttpClient();
+
+        HttpUrl.Builder urlBuilder = HttpUrl.parse("https://api.tdameritrade.com/v1/accounts").newBuilder();
+        urlBuilder.addQueryParameter("fields", "positions,orders");
+        String url = urlBuilder.build().toString();
+
+        Request request = new Request.Builder()
+                            .header("Authorization", "Bearer "+authToken)
+                             .url(url)
+                             .build();
+
+        try {
+            Response   response = client.newCall(request).execute();
+            if( response.code() != 200 ) {
+                throw new RuntimeException("Failed:" + response);
+            }
+
+            String     jsonData = response.body().string();
+            JSONArray jobj  = new JSONArray(jsonData);
+            return( jobj );
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static JSONObject getAccount (String authToken, String account) {
+        OkHttpClient client = new OkHttpClient();
+
+        HttpUrl.Builder urlBuilder = HttpUrl.parse("https://api.tdameritrade.com/v1/accounts/"+account).newBuilder();
+        urlBuilder.addQueryParameter("fields", "positions,orders");
+        String url = urlBuilder.build().toString();
+
+        Request request = new Request.Builder()
+                            .header("Authorization", "Bearer "+authToken)
+                             .url(url)
+                             .build();
+
+        try {
+            Response   response = client.newCall(request).execute();
+            if( response.code() != 200 ) {
+                throw new RuntimeException("Failed:" + response);
+            }
+
+            String     jsonData = response.body().string();
+            JSONObject jobj  = new JSONObject(jsonData);
+            return( jobj );
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
 
     /**
      *
@@ -282,7 +349,7 @@ public class AmerTest {
         System.out.println("AAA");
 
         JSONObject jo1 = new JSONObject();
-        jo1.put("keys","AAPL,MSFT");
+        jo1.put("keys","AAPL");
         jo1.put("fields","0,1,2,3,4,5,6,7");
         JSONObject jo = new JSONObject();
         jo.put("service","CHART_EQUITY");
@@ -290,6 +357,7 @@ public class AmerTest {
         jo.put("command","SUBS");
         jo.put("account",userPrincipals.getJSONArray("accounts").getJSONObject(0).getString("accountId"));
         jo.put("source",userPrincipals.getJSONObject("streamerInfo").getString("appId"));
+
         jo.put("parmeters",jo1);
 
         try
@@ -307,7 +375,7 @@ public class AmerTest {
         job1.put("fields","0,1,2,3,4,5,6,7");
         JSONObject job = new JSONObject();
         job.put("service","CHART_FUTURES");
-        job.put("requestid","2");
+        job.put("requestid","3");
         job.put("command","SUBS");
         job.put("account",userPrincipals.getJSONArray("accounts").getJSONObject(0).getString("accountId"));
         job.put("source",userPrincipals.getJSONObject("streamerInfo").getString("appId"));
