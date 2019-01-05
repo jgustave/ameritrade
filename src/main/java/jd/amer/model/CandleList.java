@@ -22,4 +22,9 @@ public class CandleList {
     public List<Candle> getCandles () {
         return candles;
     }
+
+    @Override
+    public String toString () {
+        return "CandleList{" + "empty=" + empty + ", symbol='" + symbol + '\'' + ", candles=" + candles + '}';
+    }
 }

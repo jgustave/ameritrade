@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.Properties;
 
 /**
@@ -43,25 +44,27 @@ public class AmerTest {
         props.setProperty("refresh_token",refreshToken);
         setProps(props);
 
-//        JSONArray accounts = getAccounts(authToken);
-//        JSONObject account = getAccount(authToken,accountId);
-//
-//
-//        System.out.println("isDayTrader:" + account.getJSONObject("securitiesAccount").getBoolean("isDayTrader"));
-//        System.out.println("Cash:" + account.getJSONObject("securitiesAccount").getJSONObject("currentBalances").getBigDecimal("cashAvailableForTrading"));
+        JSONArray accounts = getAccounts(authToken);
+        JSONObject account = getAccount(authToken,accountId);
 
+
+        System.out.println("isDayTrader:" + account.getJSONObject("securitiesAccount").getBoolean("isDayTrader"));
+        System.out.println("Cash:" + account.getJSONObject("securitiesAccount").getJSONObject("currentBalances").getBigDecimal("cashAvailableForTrading"));
+
+
+         //Get 1 minute bars
+        CandleList candleList = getPriceHistory(authToken, "AAPL");
+        System.out.println(candleList);
 
         // Get 1 minute bars
-        //CandleList candleList = getPriceHistory(authToken, "AAPL");
+        CandleList cl1 = getPriceHistoryByTime(authToken, "AAPL");
+        System.out.println("History range:" + new Date(cl1.getCandles().get(0).getDatetime()) + " to " + new Date(cl1.getCandles().get(cl1.getCandles().size() - 1).getDatetime()));
 
-        // Get 1 minute bars
-//        CandleList cl1 = getPriceHistoryByTime(authToken, "AAPL");
-//        System.out.println(new Date(cl1.getCandles().get(0).getDatetime()) + " to " + new Date(cl1.getCandles().get(cl1.getCandles().size() - 1).getDatetime()));
-//
-//
-//        //Get current quote and various info
-//        JSONObject qobj = getQuote(authToken, "AAPL");
-//
+
+        //Get current quote and various info
+        JSONObject qobj = getQuote(authToken, "AAPL");
+        System.out.println(qobj);
+
         //Get Ameritrade user config.
         JSONObject jobj = getUserPrincipals(authToken);
 
