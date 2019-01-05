@@ -391,7 +391,7 @@ public class AmerTest {
 //        job.put("command","SUBS");
 //        job.put("account",userPrincipals.getJSONArray("accounts").getJSONObject(0).getString("accountId"));
 //        job.put("source",userPrincipals.getJSONObject("streamerInfo").getString("appId"));
-//        job.put("parmeters",job1);
+//        job.put("parameters",job1);
 //
 //        try
 //        {
@@ -412,7 +412,7 @@ public class AmerTest {
 //        foo1.put("command","GET");
 //        foo1.put("account",userPrincipals.getJSONArray("accounts").getJSONObject(0).getString("accountId"));
 //        foo1.put("source",userPrincipals.getJSONObject("streamerInfo").getString("appId"));
-//        foo1.put("parmeters",params1);
+//        foo1.put("parameters",params1);
 //
 //        try
 //        {
@@ -432,7 +432,7 @@ public class AmerTest {
 //        foo2.put("command","SUBS");
 //        foo2.put("account",userPrincipals.getJSONArray("accounts").getJSONObject(0).getString("accountId"));
 //        foo2.put("source",userPrincipals.getJSONObject("streamerInfo").getString("appId"));
-//        foo2.put("parmeters",params2);
+//        foo2.put("parameters",params2);
 //
 //        try
 //        {
@@ -452,7 +452,7 @@ public class AmerTest {
 //        foo3.put("command","SUBS");
 //        foo3.put("account",userPrincipals.getJSONArray("accounts").getJSONObject(0).getString("accountId"));
 //        foo3.put("source",userPrincipals.getJSONObject("streamerInfo").getString("appId"));
-//        foo3.put("parmeters",params3);
+//        foo3.put("parameters",params3);
 //
 //        try
 //        {
