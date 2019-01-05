@@ -2,6 +2,8 @@ package jd.amer;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import jd.amer.model.CandleList;
 import jd.amer.model.StrmCredentials;
 import okhttp3.*;
@@ -15,7 +17,6 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.Properties;
 
 /**
@@ -356,17 +357,19 @@ public class AmerTest {
         System.out.println(foo);
         webSocket.send(foo);
 
-        JSONObject jo1 = new JSONObject();
-        jo1.put("keys","AAPL");
-        jo1.put("fields","0,1,2,3,4,5,6,7");
-        JSONObject jo = new JSONObject();
 
-        jo.put("service","CHART_EQUITY");
-        jo.put("requestid","1");
-        jo.put("command","SUBS");
-        jo.put("account",userPrincipals.getJSONArray("accounts").getJSONObject(0).getString("accountId"));
-        jo.put("source",userPrincipals.getJSONObject("streamerInfo").getString("appId"));
-        jo.put("parameters",jo1);
+        JsonObject gjop = new JsonObject();
+        gjop.addProperty("keys","AAPL");
+        gjop.addProperty("fields","0,1,2,3,4,5,6,7");
+        JsonObject gjo = new JsonObject();
+        gjo.addProperty("service","CHART_EQUITY");
+        gjo.addProperty("requestid","1");
+        gjo.addProperty("command","SUBS");
+        gjo.addProperty("account",userPrincipals.getJSONArray("accounts").getJSONObject(0).getString("accountId"));
+        gjo.addProperty("source",userPrincipals.getJSONObject("streamerInfo").getString("appId"));
+        gjo.add("parameters",gjop);
+
+
 
         try
         {
@@ -374,14 +377,9 @@ public class AmerTest {
         }catch( Exception ignored )
         {}
 
-        //js {"requests":[{"service":"CHART_EQUITY","requestid":"2","command":"SUBS","account":"490679920","source":"JDTRADER","parameters":{"keys":"AAPL","fields":"0,1,2,3,4,5,6,7,8"}}]}
-        //j  {"requests":[{"parameters":{"keys":"AAPL","fields":"0,1,2,3,4,5,6,7"},"service":"CHART_EQUITY","requestid":"1","source":"JDTRADER","command":"SUBS","account":"490679920"}]}
-        //j  {"requests":[{"parameters":{"keys":"AAPL","fields":"0,1,2,3,4,5,6,7,8"},"service":"CHART_EQUITY","requestid":"2","command":"SUBS","account":"490679920","source":"JDTRADER"}]}
+        System.out.println(wrap(gjo).toString());
+        webSocket.send(wrap(gjo).toString());
 
-//        String fooStr = "{\"requests\":[{\"service\":\"CHART_EQUITY\",\"requestid\":\"2\",\"command\":\"SUBS\",\"account\":\"490679920\",\"source\":\"JDTRADER\",\"parameters\":{\"keys\":\"AAPL\",\"fields\":\"0,1,2,3,4,5,6,7,8\"}}]}";
-//        System.out.println(fooStr);
-        System.out.println(wrap(jo).toString());
-        webSocket.send(wrap(jo).toString());
         //webSocket.send(fooStr);
 //
 //        JSONObject job1 = new JSONObject();
@@ -528,6 +526,16 @@ public class AmerTest {
             lreqArray.put(x,objs[x]);
         }
 
+        return( req );
+    }
+
+    private static JsonObject wrap(JsonObject... objs) {
+        JsonObject req = new JsonObject();
+        JsonArray lreqArray = new JsonArray();
+        req.add("requests",lreqArray);
+        for (JsonObject obj : objs) {
+            lreqArray.add(obj);
+        }
         return( req );
     }
 }
