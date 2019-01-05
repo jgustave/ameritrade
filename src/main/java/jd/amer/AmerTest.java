@@ -35,6 +35,8 @@ public class AmerTest {
         String authToken = authResponse.getString("access_token");
         String refreshToken = authResponse.getString("refresh_token");
 
+        System.out.println(authToken);
+        System.out.println(URLEncoder.encode(authToken));
 
         //Save the updated refresh token (it seems to expire before 90 days)
         props.setProperty("refresh_token",refreshToken);
@@ -289,7 +291,7 @@ public class AmerTest {
 
         OkHttpClient    client     = new OkHttpClient();
 
-        Request request = new Request.Builder().url("ws://" + strmUrl + "/ws").build();
+        Request request = new Request.Builder().url("wss://" + strmUrl + "/ws").build();
         WebSocket webSocket = client.newWebSocket(request, new WebSocketListener() {
 
             @Override
@@ -306,6 +308,7 @@ public class AmerTest {
 
             @Override
             public void onMessage (WebSocket webSocket, String text) {
+
                 System.out.println("onmsg1:"+text);
             }
 
@@ -332,12 +335,13 @@ public class AmerTest {
 
         lreq.put("service","ADMIN");
         lreq.put("command","LOGIN");
-        lreq.put("requestid",0);
+        lreq.put("requestid","0");
         lreq.put("account",userPrincipals.getJSONArray("accounts").getJSONObject(0).getString("accountId"));
         lreq.put("source",userPrincipals.getJSONObject("streamerInfo").getString("appId"));
 
         StrmCredentials sc = new StrmCredentials(userPrincipals);
-        creds.put("credential", URLEncoder.encode(sc.toQpb()));
+        //creds.put("credential", URLEncoder.encode(sc.toQpb()));
+        creds.put("credential", sc.toQpb());
         creds.put("token",userPrincipals.getJSONObject("streamerInfo").getString("token"));
         creds.put("version","1.0");
 
@@ -356,101 +360,109 @@ public class AmerTest {
         jo1.put("keys","AAPL");
         jo1.put("fields","0,1,2,3,4,5,6,7");
         JSONObject jo = new JSONObject();
+
         jo.put("service","CHART_EQUITY");
-        jo.put("requestid","2");
+        jo.put("requestid","1");
         jo.put("command","SUBS");
         jo.put("account",userPrincipals.getJSONArray("accounts").getJSONObject(0).getString("accountId"));
         jo.put("source",userPrincipals.getJSONObject("streamerInfo").getString("appId"));
-        jo.put("parmeters",jo1);
+        jo.put("parameters",jo1);
 
         try
         {
            Thread.sleep(3000);
         }catch( Exception ignored )
         {}
+
+        //js {"requests":[{"service":"CHART_EQUITY","requestid":"2","command":"SUBS","account":"490679920","source":"JDTRADER","parameters":{"keys":"AAPL","fields":"0,1,2,3,4,5,6,7,8"}}]}
+        //j  {"requests":[{"parameters":{"keys":"AAPL","fields":"0,1,2,3,4,5,6,7"},"service":"CHART_EQUITY","requestid":"1","source":"JDTRADER","command":"SUBS","account":"490679920"}]}
+        //j  {"requests":[{"parameters":{"keys":"AAPL","fields":"0,1,2,3,4,5,6,7,8"},"service":"CHART_EQUITY","requestid":"2","command":"SUBS","account":"490679920","source":"JDTRADER"}]}
+
+//        String fooStr = "{\"requests\":[{\"service\":\"CHART_EQUITY\",\"requestid\":\"2\",\"command\":\"SUBS\",\"account\":\"490679920\",\"source\":\"JDTRADER\",\"parameters\":{\"keys\":\"AAPL\",\"fields\":\"0,1,2,3,4,5,6,7,8\"}}]}";
+//        System.out.println(fooStr);
         System.out.println(wrap(jo).toString());
         webSocket.send(wrap(jo).toString());
-
-
-        JSONObject job1 = new JSONObject();
-        job1.put("keys","/ES");
-        job1.put("fields","0,1,2,3,4,5,6,7");
-        JSONObject job = new JSONObject();
-        job.put("service","CHART_FUTURES");
-        job.put("requestid","3");
-        job.put("command","SUBS");
-        job.put("account",userPrincipals.getJSONArray("accounts").getJSONObject(0).getString("accountId"));
-        job.put("source",userPrincipals.getJSONObject("streamerInfo").getString("appId"));
-        job.put("parmeters",job1);
-
-        try
-        {
-           Thread.sleep(3000);
-        }catch( Exception ignored )
-        {}
-        System.out.println(wrap(job).toString());
-        webSocket.send(wrap(job).toString());
-
-
-        JSONObject params1 = new JSONObject();
-        params1.put("symbol","/ES");
-        params1.put("frequency","m1");
-        params1.put("period","d1");
-        JSONObject foo1 = new JSONObject();
-        foo1.put("service","CHART_HISTORY_FUTURES");
-        foo1.put("requestid","3");
-        foo1.put("command","GET");
-        foo1.put("account",userPrincipals.getJSONArray("accounts").getJSONObject(0).getString("accountId"));
-        foo1.put("source",userPrincipals.getJSONObject("streamerInfo").getString("appId"));
-        foo1.put("parmeters",params1);
-
-        try
-        {
-           Thread.sleep(3000);
-        }catch( Exception ignored )
-        {}
-        System.out.println(wrap(foo1).toString());
-        webSocket.send(wrap(foo1).toString());
-
-
-        JSONObject params2 = new JSONObject();
-        params2.put("keys","/ES");
-        params2.put("fields","0,1,2,3,4");
-        JSONObject foo2 = new JSONObject();
-        foo2.put("service","LEVELONE_FUTURES");
-        foo2.put("requestid","6");
-        foo2.put("command","SUBS");
-        foo2.put("account",userPrincipals.getJSONArray("accounts").getJSONObject(0).getString("accountId"));
-        foo2.put("source",userPrincipals.getJSONObject("streamerInfo").getString("appId"));
-        foo2.put("parmeters",params2);
-
-        try
-        {
-           Thread.sleep(3000);
-        }catch( Exception ignored )
-        {}
-        System.out.println(wrap(foo2).toString());
-        webSocket.send(wrap(foo2).toString());
-
-
-        JSONObject params3 = new JSONObject();
-        params3.put("keys","AAPL");
-        params3.put("fields","0,1,2,3,4");
-        JSONObject foo3 = new JSONObject();
-        foo3.put("service","TIMESALE_EQUITY");
-        foo3.put("requestid","7");
-        foo3.put("command","SUBS");
-        foo3.put("account",userPrincipals.getJSONArray("accounts").getJSONObject(0).getString("accountId"));
-        foo3.put("source",userPrincipals.getJSONObject("streamerInfo").getString("appId"));
-        foo3.put("parmeters",params3);
-
-        try
-        {
-           Thread.sleep(3000);
-        }catch( Exception ignored )
-        {}
-        System.out.println(wrap(foo3).toString());
-        webSocket.send(wrap(foo3).toString());
+        //webSocket.send(fooStr);
+//
+//        JSONObject job1 = new JSONObject();
+//        job1.put("keys","/ES");
+//        job1.put("fields","0,1,2,3,4,5,6,7");
+//        JSONObject job = new JSONObject();
+//        job.put("service","CHART_FUTURES");
+//        job.put("requestid",3);
+//        job.put("command","SUBS");
+//        job.put("account",userPrincipals.getJSONArray("accounts").getJSONObject(0).getString("accountId"));
+//        job.put("source",userPrincipals.getJSONObject("streamerInfo").getString("appId"));
+//        job.put("parmeters",job1);
+//
+//        try
+//        {
+//           Thread.sleep(3000);
+//        }catch( Exception ignored )
+//        {}
+//        System.out.println(wrap(job).toString());
+//        webSocket.send(wrap(job).toString());
+//
+//
+//        JSONObject params1 = new JSONObject();
+//        params1.put("symbol","/ES");
+//        params1.put("frequency","m1");
+//        params1.put("period","d1");
+//        JSONObject foo1 = new JSONObject();
+//        foo1.put("service","CHART_HISTORY_FUTURES");
+//        foo1.put("requestid",3);
+//        foo1.put("command","GET");
+//        foo1.put("account",userPrincipals.getJSONArray("accounts").getJSONObject(0).getString("accountId"));
+//        foo1.put("source",userPrincipals.getJSONObject("streamerInfo").getString("appId"));
+//        foo1.put("parmeters",params1);
+//
+//        try
+//        {
+//           Thread.sleep(3000);
+//        }catch( Exception ignored )
+//        {}
+//        System.out.println(wrap(foo1).toString());
+//        webSocket.send(wrap(foo1).toString());
+//
+//
+//        JSONObject params2 = new JSONObject();
+//        params2.put("keys","/ES");
+//        params2.put("fields","0,1,2,3,4");
+//        JSONObject foo2 = new JSONObject();
+//        foo2.put("service","LEVELONE_FUTURES");
+//        foo2.put("requestid",6);
+//        foo2.put("command","SUBS");
+//        foo2.put("account",userPrincipals.getJSONArray("accounts").getJSONObject(0).getString("accountId"));
+//        foo2.put("source",userPrincipals.getJSONObject("streamerInfo").getString("appId"));
+//        foo2.put("parmeters",params2);
+//
+//        try
+//        {
+//           Thread.sleep(3000);
+//        }catch( Exception ignored )
+//        {}
+//        System.out.println(wrap(foo2).toString());
+//        webSocket.send(wrap(foo2).toString());
+//
+//
+//        JSONObject params3 = new JSONObject();
+//        params3.put("keys","AAPL");
+//        params3.put("fields","0,1,2,3,4");
+//        JSONObject foo3 = new JSONObject();
+//        foo3.put("service","TIMESALE_EQUITY");
+//        foo3.put("requestid",7);
+//        foo3.put("command","SUBS");
+//        foo3.put("account",userPrincipals.getJSONArray("accounts").getJSONObject(0).getString("accountId"));
+//        foo3.put("source",userPrincipals.getJSONObject("streamerInfo").getString("appId"));
+//        foo3.put("parmeters",params3);
+//
+//        try
+//        {
+//           Thread.sleep(3000);
+//        }catch( Exception ignored )
+//        {}
+//        System.out.println(wrap(foo3).toString());
+//        webSocket.send(wrap(foo3).toString());
 
 
     }
@@ -508,11 +520,14 @@ public class AmerTest {
      * @param obj
      * @return
      */
-    private static JSONObject wrap(JSONObject obj) {
+    private static JSONObject wrap(JSONObject... objs) {
         JSONObject req = new JSONObject();
         JSONArray lreqArray = new JSONArray();
         req.put("requests",lreqArray);
-        lreqArray.put(0,obj);
+        for( int x=0;x<objs.length;x++) {
+            lreqArray.put(x,objs[x]);
+        }
+
         return( req );
     }
 }
